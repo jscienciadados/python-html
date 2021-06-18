@@ -1,5 +1,5 @@
 import sqlite3
-from flask import Flask, g, render_template
+from flask import Flask, g, render_template, request
 
 # Configuration
 
@@ -27,4 +27,14 @@ def after(exception):
 
 @app.route('/')
 def index():
+    sql = 'SELECT titulo, texto from entradas ordeby id desc'
+    cur = g.db.execute(sql)
+    entradas = [dict(titulo=titulo, texto=texto) for titulo, texto in cur.fetchall()]
+    return render_template('index.html')  
+
+@app.route('inserir', methods=['POST'])
+def inserir_post():
+    sql = 'INSERT INTO entradas(titulo, texto) values (? ?)'
+    g.db.execute(sql, [request.form['titulo'], request.form['texto']])  
+    g.db.commit()
     return render_template('index.html')   
